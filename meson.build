@@ -207,6 +207,11 @@ mariadb_dep = dependency('libmariadb',
 	#include_type: 'system'
 )
 
+betree_dep = dependency('libbetree',
+	version: '>= 0', # TODO: proper version constraint
+	required: false
+)
+
 # Ubuntu's package does not ship a pkg-config file
 if not mariadb_dep.found()
 	# FIXME This should use Meson's config-tool
@@ -549,6 +554,10 @@ if mariadb_dep.found()
 	julea_backends += 'db/mysql'
 endif
 
+if betree_dep.found()
+	julea_backends += 'object/betree'
+endif
+
 foreach backend: julea_backends
 	backend_type = backend.split('/')[0]
 	backend_name = backend.split('/')[1]
@@ -558,6 +567,8 @@ foreach backend: julea_backends
 
 	if backend == 'object/rados'
 		extra_deps += rados_dep
+	elif backend == 'object/betree'
+		extra_deps += betree_dep
 	elif backend == 'kv/leveldb'
 		# leveldb bug (will be fixed in 1.23)
 		# https://github.com/google/leveldb/pull/365
